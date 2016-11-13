@@ -82,7 +82,26 @@ def collapse_list(items):
     return result
 
 
-def rename_imgseq(firstitem, newname, newnumdigits=None):
+def offset_seq(firstitem, offset, newnumdigits=None):
+    """Given the file path to the first item in a complete sequence,
+    renumbers each file in the sequence by offseting it by offset.
+    THIS WILL OVERWRITE ANY EXISTING FILES."""
+    direc, name, numdigits, firstnum, extension = parse_item(firstitem)
+    if newnumdigits is None:
+        newnumdigits = numdigits
+    lastnum = sequence_length(firstitem)
+    if offset < 0:
+        r = range(firstnum, lastnum + 1, 1)
+    else:
+        r = range(lastnum, firstnum - 1, -1)
+
+    for i in r:
+        src = os.path.join(direc, name + add_leading_zeroes(i, numdigits) + extension)
+        dst = os.path.join(direc, name + add_leading_zeroes(i + offset, newnumdigits) + extension)
+        shutil.move(src, dst)
+
+
+def rename_seq(firstitem, newname, newnumdigits=None):
     """Given the file path to the first item in a complete sequence,
     renames each file in the sequence while preserving the files' number.
     THIS WILL OVERWRITE ANY EXISTING FILES."""
@@ -97,7 +116,7 @@ def rename_imgseq(firstitem, newname, newnumdigits=None):
         shutil.move(src, dst)
 
 
-def reverse_imgseq(firstitem, writeto=None):
+def reverse_seq(firstitem, writeto=None):
     """Given the file path to the first item in a complete sequence,
     reverses the sequence. writeto is an optional directory to place
     the reversed sequence; if it is not specified, the sequence will be
